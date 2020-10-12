@@ -1,0 +1,39 @@
+gha_bin_size: 0.05
+sun_el_max: -10
+moon_el_max: 90
+ambient_humidity_max: 40 #100
+min_receiver_temp: 0
+max_receiver_temp: 100
+do_rms_filter: true
+#rms_filter_file: null
+
+n_poly_tp_filter: 3
+n_sigma_tp_filter: 3.0
+bands_tp_filter: null # whole band
+std_thresholds_tp_filter: null #doesnt implement
+rms_bands: 
+        - "full"
+        - "low"
+        - "high"
+n_poly_rms: 3
+n_sigma_rms:  3
+n_terms_rms: 16
+n_std_rms:  6
+n_files_rms: 10
+
+do_total_power_filter: true
+n_threads: 32
+xrfi_pipe:
+  xrfi_model:
+    n_signal: 6
+    n_resid: 6
+    threshold: 4
+    max_iter: 20
+    increase_order: false
+    decrement_threshold: 0
+    min_threshold: 3
+    watershed: 4
+  xrfi_watershed:
+        tol: 0.7
+
+

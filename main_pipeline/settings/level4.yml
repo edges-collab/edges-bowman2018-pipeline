@@ -1,0 +1,6 @@
+f_low: 50.0
+f_high: 100.0
+ignore_freq_ranges: null
+freq_resolution: 0.390625
+gha_min: 6
+gha_max: 18
