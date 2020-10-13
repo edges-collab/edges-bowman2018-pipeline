@@ -4,8 +4,9 @@ moon_el_max: 90
 ambient_humidity_max: 40 #100
 min_receiver_temp: 0
 max_receiver_temp: 100
-do_rms_filter: true
+do_rms_filter: false
 #rms_filter_file: null
+gha_quick_bin: true
 
 n_poly_tp_filter: 3
 n_sigma_tp_filter: 3.0
@@ -36,4 +37,4 @@ xrfi_pipe:
   xrfi_watershed:
         tol: 0.7
 
-
+        
