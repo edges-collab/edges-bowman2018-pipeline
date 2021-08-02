@@ -1,0 +1,5 @@
+freq_resolution: 0.3965
+gha_min: 0
+gha_max: 24
+gha_bin_size: 24
+
