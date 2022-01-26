@@ -135,3 +135,9 @@ dmypy.json
 *.info
 *.flag_info
 *~
+
+open_*.h5
+ambient_*.h5
+short_*.h5
+hot_load_*.h5
+AntSim1_*.h5
