@@ -1,6 +1,0 @@
-- aux_filter:
-    sun_el_max: -10
-    moon_el_max: 90
-    ambient_humidity_max: 40
-    min_receiver_temp: 0
-    max_receiver_temp: 100
