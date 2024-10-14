@@ -12,9 +12,12 @@ description = "Run Bowman (2018) pipeline using edges-analysis"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "astropy-healpix>=1.0.3",
     "edges-analysis>=4.1.3",
     "edges-cal>=7.0.0",
+    "edges-estimate>=1.3.0",
     "edges-io>=4.1.7",
+    "edges-pipelines",
     "jupyter>=1.1.1",
     "nbconvert>=7.16.4",
     "papermill>=2.6.0",
@@ -100,5 +103,8 @@ dev-dependencies = [
     "ruff>=0.6.8",
     "setuptools-scm>=8.1.0",
 ]
+
+[tool.uv.sources]
+edges-pipelines = { workspace = true }
 
 

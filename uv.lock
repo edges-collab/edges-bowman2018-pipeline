@@ -266,6 +266,24 @@ wheels = [
 ]
 
 [[package]]
+name = "astropy-healpix"
+version = "1.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "astropy" },
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/40/69/5ca5c2446969e37b4e6b34d35b51c254efdd82de2afe1170de1b8cbfa401/astropy_healpix-1.0.3.tar.gz", hash = "sha256:de5d2a7ec97b167045066971f25a150d1e4061f07159be23649634db36e79746", size = 108935 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/b1/6bf5fbd51171a6a5b2ccc33901b2d6e83bf03478c41e9af8d8cc88216b3c/astropy_healpix-1.0.3-cp39-abi3-macosx_10_9_x86_64.whl", hash = "sha256:1a523b4bda2618a94efad12b60431c28c0f5ef4b5afb890d21a858aef2ed779a", size = 87606 },
+    { url = "https://files.pythonhosted.org/packages/9f/97/0a8fa08b0982e227282bd4f4651348e2881af022c26f312b75e11649c963/astropy_healpix-1.0.3-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:fa34adecf7f5168d65cda05d40db95d4a1aad3e6b66f43489ed4aac471f76496", size = 81570 },
+    { url = "https://files.pythonhosted.org/packages/65/49/82b82448f35abb9a3fb9769e2218a4fa36295e4e6a65b826098326ef148a/astropy_healpix-1.0.3-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6a7d2163421ba66e06ed40b7ce7ce89fea60a342d035974c98c2c06c6cf187e9", size = 191668 },
+    { url = "https://files.pythonhosted.org/packages/ee/5e/d1adcb58fd698e78a53b67cdfb7d5a91f895f9f82c7d51f1c79bd0e133c7/astropy_healpix-1.0.3-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a5b03a5b18c28ab7ac030a22157cfcd8ff951db7fc751e29e854c17d3da52537", size = 194790 },
+    { url = "https://files.pythonhosted.org/packages/34/49/1eee62c1ece041c5c99c0be180682abefd365f08febd09a34a425e9e3851/astropy_healpix-1.0.3-cp39-abi3-win32.whl", hash = "sha256:ec083f48e091baa5ce97c2e96e94b9fc8921a8c370768a92ac14e86fa3465248", size = 52102 },
+    { url = "https://files.pythonhosted.org/packages/77/26/34305920bd2bff9f22d11775f46cbdd02fc73220340a80ad6d8a71ca91b4/astropy_healpix-1.0.3-cp39-abi3-win_amd64.whl", hash = "sha256:e8c32aabfa1fa7d6fd629e3918680cd0585656cfca6ec0c5dafe9e1c7a304508", size = 54236 },
+]
+
+[[package]]
 name = "astropy-iers-data"
 version = "0.2024.9.30.0.32.59"
 source = { registry = "https://pypi.org/simple" }
@@ -816,6 +834,23 @@ wheels = [
 ]
 
 [[package]]
+name = "edges-estimate"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cached-property" },
+    { name = "click" },
+    { name = "edges-cal" },
+    { name = "numpy" },
+    { name = "scipy" },
+    { name = "yabf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/21/82/59f0002676616ef4622ce44cb129420d2dd9e9b2220eef741040b86e3c0d/edges_estimate-1.3.0.tar.gz", hash = "sha256:3291fa90c4939c73fd77dae89181e5360b2ceb366ba9225abc8089a084fa42e8", size = 5018206 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b0/7d/a6e8d964a52911b6fec47e22b8d35662bbee56a3bbc8822155d4f10bf401/edges_estimate-1.3.0-py2.py3-none-any.whl", hash = "sha256:b82619a438e013d24cd0f7e7f4a2e3a80c6423ca9ee10575c260cd3ce1bcb3ed", size = 23355 },
+]
+
+[[package]]
 name = "edges-io"
 version = "4.1.7"
 source = { registry = "https://pypi.org/simple" }
@@ -847,8 +882,10 @@ name = "edges-pipelines"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "astropy-healpix" },
     { name = "edges-analysis" },
     { name = "edges-cal" },
+    { name = "edges-estimate" },
     { name = "edges-io" },
     { name = "jupyter" },
     { name = "nbconvert" },
@@ -865,9 +902,12 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "astropy-healpix", specifier = ">=1.0.3" },
     { name = "edges-analysis", specifier = ">=4.1.3" },
     { name = "edges-cal", specifier = ">=7.0.0" },
+    { name = "edges-estimate", specifier = ">=1.3.0" },
     { name = "edges-io", specifier = ">=4.1.7" },
+    { name = "edges-pipelines", editable = "." },
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "nbconvert", specifier = ">=7.16.4" },
     { name = "papermill", specifier = ">=2.6.0" },
@@ -1028,6 +1068,19 @@ sdist = { url = "https://files.pythonhosted.org/packages/62/7c/12b0943011daaaa9c
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1d/a0/6aaea0c2fbea2f89bfd5db25fb1e3481896a423002ebe4e55288907a97a3/fsspec-2024.9.0-py3-none-any.whl", hash = "sha256:a0947d552d8a6efa72cc2c730b12c41d043509156966cca4fb157b0f2a0c574b", size = 179253 },
 ]
+
+[[package]]
+name = "getdist"
+version = "1.5.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3d/7e/c8890f7c3c89c63c3b443f9fad6824da917537a8cc3935e8b79e5c1fc6ab/getdist-1.5.3.tar.gz", hash = "sha256:7819521651b459295a055c151c9f7b3de0637677f190f5aea7caaf54db371843", size = 826686 }
 
 [[package]]
 name = "graphviz"
@@ -3704,6 +3757,25 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/9f/e9/66f1058f20a77e62bf42fd72d07de34b928b1d485ff17dc66810dc2596a0/wirerope-0.4.7.tar.gz", hash = "sha256:f3961039218276283c5037da0fa164619def0327595f10892d562a61a8603990", size = 8476 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d4/a3/e6963baa7a884915831c80ca31f0ca18f776c2298639b4978834ec1d9288/wirerope-0.4.7-py2.py3-none-any.whl", hash = "sha256:332973a3be6898f02fd0e73b2e20414c5102cc6c811d75856a938206677495c8", size = 9045 },
+]
+
+[[package]]
+name = "yabf"
+version = "2.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cached-property" },
+    { name = "click" },
+    { name = "frozendict" },
+    { name = "getdist" },
+    { name = "numpy" },
+    { name = "pyyaml" },
+    { name = "rich" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/39/ee/c95f3bbcc4cf19fdb74cf16d2b15712a7bd28abcb5bc94de18c98f49d227/yabf-2.1.1.tar.gz", hash = "sha256:2e5e10b64befe3dec017303124fb7a40787a53e1ab94a87814d10e922401b8e4", size = 45180 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/88/65/ce06a22367ffad5a9ceade4e90a0283e3e3afc21a74f19656d583a073c80/yabf-2.1.1-py2.py3-none-any.whl", hash = "sha256:8ce1ed8104be9ffddaa2e588bec82eadfdaf6c18ad19cd2ba2381361228662aa", size = 34143 },
 ]
 
 [[package]]
