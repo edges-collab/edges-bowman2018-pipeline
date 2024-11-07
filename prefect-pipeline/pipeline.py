@@ -20,8 +20,8 @@ for nb in notebooks:
         nb_hashes[nb.with_suffix("").name] = hash(fl.read())
         
 def notebook_hasher(notebook):
-    def fnc(context, parameters: dict):
-        return hash(tuple(parameters.keys()) + tuple(parameters.values())) + hash(inspect.getsource(context.task.fn)) + nb_hashes[notebook]
+    def fnc(context, parameters: dict) -> str:
+        return str(hash(tuple(parameters.keys()) + tuple(parameters.values())) + hash(inspect.getsource(context.task.fn)) + nb_hashes[notebook])
     return fnc
     
 @task(
@@ -188,7 +188,7 @@ def get_ydays(first_yday, last_yday) -> list[tuple[int, int]]:
         day += timedelta(days=1)
     return ydays
 
-@task(cache_key_fn=notebook_hasher('average-over-days'),)
+@task(persist_result=False)
 def average_over_days(
     fl: Path,
     kernel: str,
@@ -211,7 +211,7 @@ def average_over_days(
         raise RuntimeError("Something broke when running average_over_days")
     return outfile
     
-@task(cache_key_fn=notebook_hasher('interpret'),)
+@task(persist_result=False)
 def interpret(
     fl: Path | None,
     kernel: str,
@@ -232,7 +232,7 @@ def interpret(
     
 @flow(
     flow_run_name="{first_yday[0]}:{first_yday[1]:>03}-{last_yday[0]}:{last_yday[1]:>03}",
-    task_runner=DaskTaskRunner(),
+    task_runner=DaskTaskRunner(cluster_kwargs={"n_workers": 30}),
 )
 def run_full_pipeline(
     first_yday: tuple[int, int],
