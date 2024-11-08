@@ -12,6 +12,8 @@ here = Path(__file__).parent
 from hashlib import md5
 from edges_pipelines import NOTEBOOK_DIR
 
+
+
 # Make hashes for all the notebooks
 notebooks = NOTEBOOK_DIR.glob("*.ipynb")
 nb_hashes = {}
@@ -27,7 +29,7 @@ def notebook_hasher(notebook):
 @task(
     persist_result=True, 
     tags=["day-sized"], 
-    task_run_name="avg-{yday[0]}-{yday[1]:>03}", 
+    task_run_name="avg-{yday[0]}_{yday[1]:>03}", 
     cache_key_fn=notebook_hasher('single-day'),
 )
 def run_daily_notebook(
@@ -39,7 +41,7 @@ def run_daily_notebook(
 ) -> Path:
     year, day = yday
     run_notebook(
-        "single-day",
+        notebook = "single-day",
         kernel=kernel,
         output_dir=output_dir,
         convert_args=convert_args,
@@ -50,7 +52,7 @@ def run_daily_notebook(
         cachedir=str(output_dir.absolute()),
     )
 
-    outfile = output_dir / f"{year}-{day:>03}.averaged.gsh5"
+    outfile = output_dir / f"{year}_{day:>03}.averaged.gsh5"
     
     if outfile.exists():
         return outfile
@@ -58,7 +60,7 @@ def run_daily_notebook(
         # Just because it doesn't exist doesn't mean the notebook failed... there 
         # might just not be any data that night. If the notebook ERRORS it will still
         # be a failed task.
-        print(f"No averaged file created for {year}-{day:>03}!")
+        print(f"No averaged file created for {year}_{day:>03}!")
         return None
     
 @task(
@@ -83,7 +85,7 @@ def run_daily_cal_notebook(
     year, day = yday
          
     run_notebook(
-        "single-day-calibration",
+        notebook = "single-day-calibration",
         kernel=kernel,
         output_dir=output_dir,
         convert_args=convert_args,
@@ -115,7 +117,7 @@ def run_ants11_notebook(
 ) -> Path:
     
     run_notebook(
-        "ants11",
+        notebook = "ants11",
         kernel=kernel,
         output_dir=str(output_dir),
         convert_args=convert_args,
@@ -123,7 +125,7 @@ def run_ants11_notebook(
         outdir=str(output_dir),
     )
 
-    outfile = output_dir / "edges3_ants11_modelled.h5"
+    outfile = output_dir / "ants11_modelled.h5"
     
     if not outfile.exists():
         raise RuntimeError(f"Failed to create {outfile}!")
@@ -141,11 +143,12 @@ def run_receiver_cal_notebook(
     cfgfile: Path | None = None,
     convert_args: str = "",
 ) -> Path:
+
     
     run_notebook(
-        "receiver-calibration",
+        notebook = "receiver-calibration",
         kernel=kernel,
-        outpath=str(output_dir),
+        outpath=Path(output_dir),
         convert_args=convert_args,
         cfgfile=cfgfile,
     )
@@ -169,7 +172,7 @@ def gather_days_into_one_gsh5(day_files: list[Path | None]) -> Path:
 
 @task
 def get_ydays(first_yday, last_yday) -> list[tuple[int, int]]:
-    datadir = Path("/data5/edges/data/EDGES3_data/MRO/")
+    data_dir = Path("/data5/edges/data/EDGES3_data/MRO/mro/ant/")
     
     first = dt(year=first_yday[0], month=1, day=1) + timedelta(days=first_yday[1]-1)
     last = dt(year=last_yday[0], month=1, day=1) + timedelta(days=last_yday[1]-1)
@@ -179,7 +182,7 @@ def get_ydays(first_yday, last_yday) -> list[tuple[int, int]]:
     while day <= last:
         tt = day.timetuple()
         y,d = tt.tm_year, tt.tm_yday
-        files_to_load = sorted((datadir / str(y)).glob(f"{y}_{d:>03}_*.acq"))
+        files_to_load = sorted((data_dir / str(y)).glob(f"{y}_{d:>03}_*.acq"))
         if files_to_load:
             ydays.append((y, d))
         else:
@@ -203,7 +206,7 @@ def average_over_days(
         convert_args=convert_args,
         cfgfile=cfgfile,
         basename=f"average-over-days",
-        datadir=str(fl.parent.absolute()),
+        data_dir=str(fl.parent.absolute()),
         gathered_days_file=fl.name
     )
     outfile = fl.parent / "averaged_spectrum.gsh5"
@@ -226,7 +229,7 @@ def interpret(
         convert_args=convert_args,
         cfgfile=cfgfile,
         basename=f"average-over-days",
-        datadir=str(fl.parent.absolute()),
+        data_dir=str(fl.parent.absolute()),
         avgspec_file=fl.name
     )
     
@@ -299,8 +302,8 @@ def run_full_pipeline(
 
 if __name__ == "__main__":
     run_full_pipeline(
-        first_yday = (2022, 300),
-        last_yday = (2022, 309),
-        kernel="b18",
+        first_yday = (2023, 300),
+        last_yday = (2023, 309),
+        kernel="prefect-edges",
         output_dir=here.parent / "output-notebooks",
     )
