@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 from prefect import task, flow, unmapped
@@ -23,7 +24,9 @@ for nb in notebooks:
         
 def notebook_hasher(notebook):
     def fnc(context, parameters: dict):
-        return hash(tuple(parameters.keys()) + tuple(parameters.values())) + hash(inspect.getsource(context.task.fn)) + nb_hashes[notebook]
+        print('hasher value: ',hash(tuple(parameters.keys()) + tuple(parameters.values())) + hash(inspect.getsource(context.task.fn)) + nb_hashes[notebook])
+        return str(hash(tuple(parameters.keys()) + tuple(parameters.values())) + hash(inspect.getsource(context.task.fn)) + nb_hashes[notebook])
+        
     return fnc
     
 @task(
@@ -53,6 +56,8 @@ def run_daily_notebook(
     )
 
     outfile = output_dir / f"{year}_{day:>03}.averaged.gsh5"
+
+    print('outfile from run_notebook:', outfile)
     
     if outfile.exists():
         return outfile
@@ -80,6 +85,7 @@ def run_daily_cal_notebook(
 ) -> Path:
     if avgfile is None:
         # That's fine.
+        print('why None here?')
         return None
 
     year, day = yday
@@ -99,9 +105,11 @@ def run_daily_cal_notebook(
     )
 
     outfile = avgfile.parent / avgfile.name.replace(".averaged.", ".finalspec.")
+    outfile = avgfile
+    print('outfile in run_daily_cal_notebook:', avgfile)
     if not outfile.exists():
         raise RuntimeError(f"Failed to create {outfile}!")
-    
+    print('outfile from run_notebook', outfile)
     return outfile
 
 @task(
@@ -148,12 +156,12 @@ def run_receiver_cal_notebook(
     run_notebook(
         notebook = "receiver-calibration",
         kernel=kernel,
-        outpath=Path(output_dir),
+        output_dir=str(output_dir),
         convert_args=convert_args,
         cfgfile=cfgfile,
     )
 
-    outfile = output_dir / "specal.txt"
+    outfile = Path(output_dir) / "specal.txt" #Steven did not have Path() here
     
     if not outfile.exists():
         raise RuntimeError(f"Failed to create {outfile}!")
@@ -164,10 +172,11 @@ def run_receiver_cal_notebook(
 @task(persist_result=True, cache_policy=INPUTS+TASK_SOURCE)
 def gather_days_into_one_gsh5(day_files: list[Path | None]) -> Path:
     """Gather all the individual .finalspec. files into one GSH5 file."""
+    print('day_files inside function:', day_files)
     day_files = sorted([d for d in day_files if d is not None])
     data = GSData.from_file(day_files, concat_axis='time')
     outfile = day_files[0].parent / "gathered-days.gsh5"
-    data.write_gsh5(outfile)
+    data.write_gsh5(str(outfile))
     return outfile
 
 @task
@@ -191,9 +200,10 @@ def get_ydays(first_yday, last_yday) -> list[tuple[int, int]]:
         day += timedelta(days=1)
     return ydays
 
-@task(cache_key_fn=notebook_hasher('average-over-days'),)
+#@task(cache_key_fn=notebook_hasher('average-over-days'),)
+@task(persist_result=False)
 def average_over_days(
-    fl: Path,
+    fl: list[Path | None],
     kernel: str,
     cfgfile: Path | None = None,
     convert_args: str = "",
@@ -202,19 +212,20 @@ def average_over_days(
     run_notebook(
         "average-over-days",
         kernel=kernel,
-        output_dir=str(fl.parent.absolute()),
+        output_dir=str(fl[0].parent.absolute()),
         convert_args=convert_args,
         cfgfile=cfgfile,
         basename=f"average-over-days",
-        data_dir=str(fl.parent.absolute()),
-        gathered_days_file=fl.name
+        data_dir=str(fl[0].parent.absolute()),
+        nightly_files=[str(f) for f in fl]
     )
-    outfile = fl.parent / "averaged_spectrum.gsh5"
+    outfile = fl[0].parent / "averaged_spectrum.gsh5"
     if not outfile.exists():
         raise RuntimeError("Something broke when running average_over_days")
     return outfile
     
-@task(cache_key_fn=notebook_hasher('interpret'),)
+#@task(cache_key_fn=notebook_hasher('interpret'),)
+@task(persist_result=False)
 def interpret(
     fl: Path | None,
     kernel: str,
@@ -230,12 +241,12 @@ def interpret(
         cfgfile=cfgfile,
         basename=f"average-over-days",
         data_dir=str(fl.parent.absolute()),
-        avgspec_file=fl.name
+        avgspec_file=str(fl.name)
     )
     
 @flow(
     flow_run_name="{first_yday[0]}:{first_yday[1]:>03}-{last_yday[0]}:{last_yday[1]:>03}",
-    task_runner=DaskTaskRunner(),
+    task_runner=DaskTaskRunner(cluster_kwargs={"n_workers": 4}),
 )
 def run_full_pipeline(
     first_yday: tuple[int, int],
@@ -251,6 +262,8 @@ def run_full_pipeline(
 ):
     ydays = get_ydays(first_yday, last_yday)
     
+    print('types: ', type(kernel),type(output_dir), type(rcvcal_cfgfile), type(convert_args))
+
     calfile = run_receiver_cal_notebook(
         kernel=kernel,
         output_dir=output_dir,
@@ -274,6 +287,8 @@ def run_full_pipeline(
         convert_args=unmapped(convert_args),
     )
 
+    print('avgfiles:', avgfiles)
+
     calfiles = run_daily_cal_notebook.map(
         avgfiles,
         ydays,
@@ -286,24 +301,27 @@ def run_full_pipeline(
         
     )
     
-    gathered_fl = gather_days_into_one_gsh5(calfiles)
+    print('calfile:', calfiles)
+    #gathered_fl = gather_days_into_one_gsh5(calfiles)
+    print('gathered files:', gathered_fl)
     specavg = average_over_days(
-        gathered_fl,
+        calfiles,
         kernel=unmapped(kernel),
         cfgfile=unmapped(dayavg_cfgfile),
         convert_args=unmapped(convert_args)
     )
-    interpret(
-        specavg, 
-        kernel=unmapped(kernel),
-        cfgfile=unmapped(inspect_cfgfile),
-        convert_args=unmapped(convert_args)
-    )
+    # interpret(
+    #     specavg,
+    #     kernel=unmapped(kernel),
+    #     cfgfile=unmapped(inspect_cfgfile),
+    #     convert_args=unmapped(convert_args)
+    # )
 
 if __name__ == "__main__":
+
     run_full_pipeline(
         first_yday = (2023, 300),
         last_yday = (2023, 309),
         kernel="prefect-edges",
-        output_dir=here.parent / "output-notebooks",
+        output_dir= Path(here.parent / "prefect-pipeline/output-notebooks"),
     )
