@@ -23,10 +23,11 @@ dependencies = [
     "papermill>=2.6.0",
     "prefect[dask]>=3.0.3",
     "pygsdata>=0.2.0",
+    "read-acq>=1.0.2",
 ]
 
 [project.scripts]
-epipe = "edges_pipelines.cli:main"
+epipe = "edges_pipelines.cli:app"
 
 [tool.ruff]
 line-length = 88
@@ -106,5 +107,7 @@ dev-dependencies = [
 
 [tool.uv.sources]
 edges-pipelines = { workspace = true }
+read-acq = { git = "https://github.com/edges-collab/read_acq", rev = "fix-reading-empty-files" }
+edges-analysis = { git = "https://github.com/edges-collab/edges-analysis", rev = "reftime-for-lstbin" }
 
 

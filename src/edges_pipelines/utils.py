@@ -5,6 +5,8 @@ from importlib.metadata import version
 import numpy as np
 
 def yday_to_alanday(year: int, day: int):
+    year=int(year)
+    day = int(day)
     if year == 2015:
         return day
     elif year == 2016:
@@ -12,7 +14,7 @@ def yday_to_alanday(year: int, day: int):
     elif year == 2017:
         return 732 + day
     else:
-        raise ValueError("Year must be 2015, 2016 or 2017")
+        raise ValueError(f"Year must be 2015, 2016 or 2017, got '{year}'")
     
 def plot_single_spectrum(data: GSData, alanspec = None, attribute='data'):
     if alanspec is not None:

@@ -144,3 +144,10 @@ AntSim1_*.h5
 cache/
 output-notebooks/
 prefect-cache/
+work/
+results/*/notebook-html/
+results/*/notebook-ipynb/single-day*
+*.gsh5
+.nextflow.log*
+report-*.html
+.nextflow/

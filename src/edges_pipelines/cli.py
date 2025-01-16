@@ -1,168 +1,91 @@
-import subprocess as sbp
 from pathlib import Path
-
-import click
+from .runners import run_notebook, notebook_choices
+import typer
 import jupyter_client
-import papermill as pm
-import toml
-import yaml
-from multiprocess import Pool
+from typing import Optional
+from pygsdata import GSData
+import h5py
 
 k_manager = jupyter_client.kernelspec.KernelSpecManager()
 avail_kernels = k_manager.find_kernel_specs()
-
-main = click.Group()
-
 here = Path(__file__).parent
 
-NOTEBOOK_DICT = {fl.stem: fl for fl in (here / "notebooks").glob("*.ipynb")}
 
 
-@main.group(
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-    )
+app = typer.Typer()
+
+@app.command(
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
 )
-@click.option(
-    "-k", "--kernel", type=click.Choice(list(avail_kernels.keys())), default="python3"
-)
-@click.option("-f", "--formats", type=str, multiple=True, default=["html"])
-@click.option("--ipynb/--no-ipynb", default=True)
-@click.option("-o", "--output", type=str, default=None)
-@click.option(
-    "--output-dir",
-    type=click.Path(exists=True, dir_okay=True, file_okay=False),
-    default="output-notebooks",
-)
-@click.option("--convert-args", type=str, default="")
-@click.option(
-    "--toml", type=click.Path(exists=True, dir_okay=False, file_okay=True), default=None
-)
-@click.option("--days", type=str, multiple=True)
-@click.option("--threads", default=1)
-@click.pass_context
 def run(
-    ctx, kernel, formats, ipynb, output, output_dir, convert_args, toml, days, threads
+    ctx: typer.Context, 
+    notebook: notebook_choices,
+    kernel: str,
+    formats: list[str] = ("html",),
+    ipynb: bool = True,
+    nbout: Path = Path(),
+    convert_args: str = "",
+    cfgfile: Optional[Path] = None,
+    basename: Optional[str] = None,
 ):
-    """Use papermill to run a hera-templates notebook."""
-    ctx.ensure_object(dict)
+    kwargs = {}
+    for i, arg in enumerate(ctx.args[::2]):
+        kwargs[arg.replace("--","")] = ctx.args[2*i + 1]
 
-    ctx.obj["kernel"] = kernel
-    ctx.obj["formats"] = formats
-    ctx.obj["ipynb"] = ipynb
-    ctx.obj["output_dir"] = output_dir
-    ctx.obj["convert_args"] = convert_args
-    ctx.obj["toml"] = toml
-    ctx.obj["days"] = sorted(
-        set(
-            sum(
-                [list(range(*tuple(int(n) for n in d.split("~")))) for d in days],
-                start=[],
-            )
-        )
+    run_notebook(
+        notebook=notebook,
+        kernel=kernel,
+        formats=formats,
+        ipynb=ipynb,
+        output_dir=nbout,
+        convert_args=convert_args,
+        cfgfile=cfgfile,
+        basename=basename,
+        **kwargs
     )
-    ctx.obj["threads"] = threads
 
 
-def run_notebook_factory(notebook):
-    @click.option("-o", "--basename", type=str, default=None)
-    @click.pass_context
-    def runfunc(ctx, basename, **kwargs):
-        nbfile = NOTEBOOK_DICT[notebook]
+@app.command()
+def get_ydays(
+    first_year: int, 
+    first_day: int, 
+    last_year: int, 
+    last_day: int,
+    print_index: bool = False,
+):
+    from pathlib import Path
+    from datetime import datetime as dt, timedelta
 
-        if basename is None:
-            basename = notebook
-
-        if (pfile := ctx.obj["toml"]) is not None:
-            if pfile.endswith(".toml"):
-                kwargs.update(toml.load(pfile))
-            elif pfile.endswith(".yaml"):
-                with open(pfile) as fl:
-                    kwargs.update(yaml.load(fl))
+    datadir = Path("/data5/edges/data/2014_February_Boolardy/mro/low/")
+    
+    first = dt(year=first_year, month=1, day=1) + timedelta(days=first_day-1)
+    last = dt(year=last_year, month=1, day=1) + timedelta(days=last_day-1)
+    
+    day=first
+    index = 0
+    while day <= last:
+        tt = day.timetuple()
+        y,d = tt.tm_year, tt.tm_yday
+        files_to_load = sorted((datadir / str(y)).glob(f"{y}_{d:>03}_*.acq"))
+        if files_to_load:
+            if print_index:
+                print(f"{index:03}: {y}-{d:03} [{', '.join(x.name for x in files_to_load)}]")
             else:
-                raise ValueError(f"Unkown extension on --toml input: {ctx.obj['toml']}")
+                print(f"{y}-{d:03}")
+            index += 1
+        day += timedelta(days=1)
 
-        kwargs["papermill_input_path"] = str(nbfile)
-
-        pool = Pool(ctx.obj["threads"])
-
-        def execute_for_a_day(day):
-            kw = {**kwargs, "day": day}
-            output_path = Path(ctx.obj["output_dir"]) / f"{basename}-{day}.ipynb"
-            print(f"Executing Notebook and saving to {output_path}")
-            print(f"Got notebook params: '{kwargs}'")
-
-            kwargs["papermill_output_path"] = str(output_path)
-
-            pm.execute_notebook(
-                str(nbfile),
-                output_path=output_path,
-                kernel_name=ctx.obj["kernel"],
-                parameters=kw,
-            )
-
-        pool.map(execute_for_a_day, ctx.obj["days"])
-
-        for fmt in ctx.obj["formats"]:
-            for day in ctx.obj["days"]:
-                print(f"Converting executed notebook to {fmt}...")
-                output_path = Path(ctx.obj["output_dir"]) / f"{basename}-{day}.ipynb"
-
-                sbp.run(
-                    [
-                        "jupyter",
-                        "nbconvert",
-                        "--output",
-                        f"{basename}-{day}.{fmt}",
-                        "--output-dir",
-                        str(output_path.parent),
-                        "--to",
-                        fmt,
-                        ctx.obj["convert_args"],
-                        str(output_path),
-                    ],
-                    check=True,
-                )
-
-        if not ctx.obj["ipynb"]:
-            output_path.unlink()
-
-    infer = pm.inspect_notebook(str(NOTEBOOK_DICT[notebook]))
-    tps = {
-        "str": str,
-        "int": int,
-        "float": float,
-        "bool": bool,
-        None: None,
-    }
-    params = [
-        click.option(
-            f"--{param.replace('_', '-')}",
-            type=tps[v["inferred_type_name"]],
-            default=eval(v["default"]),
-            help=v["help"],
-            show_default=True,
-        )
-        if v["inferred_type_name"] != "bool"
-        else click.option(
-            f"--{param.replace('_', '-')}/--no-{param.replace('_', '-')}",
-            help=v["help"],
-            default=eval(v["default"]),
-        )
-        for param, v in infer.items()
-        if v["inferred_type_name"] in tps
-    ]
-
-    # Add all the parameters:
-    for param in params:
-        runfunc = param(runfunc)
-
-    return click.command(name=notebook)(runfunc)
-
-
-for nb in NOTEBOOK_DICT:
-    run.add_command(run_notebook_factory(nb))
-
+@app.command()
+def gather(files: list[Path], outfile: Path):
+    """Gather all the individual .finalspec. files into one GSH5 file."""
+    fldict = {}
+    for fl in files:
+        with h5py.File(fl, 'r') as _fl:
+            fldict[fl] = _fl['metadata']['times'][0]
+            
+    day_files = sorted(files, key=lambda pth: fldict[pth])
+    data = GSData.from_file(day_files, concat_axis='time')
+    data.write_gsh5(outfile)
+    
 if __name__ == "__main__":
-    main()
+    app()
