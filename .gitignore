@@ -151,3 +151,7 @@ results/*/notebook-ipynb/single-day*
 .nextflow.log*
 report-*.html
 .nextflow/
+*.acq
+prefect-pipeline/
+sp*.txt
+s11*.csv
