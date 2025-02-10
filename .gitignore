@@ -144,3 +144,9 @@ AntSim1_*.h5
 cache/
 output-notebooks/
 prefect-cache/
+*.acq/
+prefect-pipeline/
+.nextflow/
+*.acq
+sp*.txt
+s11*.csv
