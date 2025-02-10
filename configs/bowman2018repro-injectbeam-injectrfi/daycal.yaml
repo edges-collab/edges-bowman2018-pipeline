@@ -1,0 +1,3 @@
+do_beam_correction: true
+inject_beam: true
+use_alans_beam_lsts: true

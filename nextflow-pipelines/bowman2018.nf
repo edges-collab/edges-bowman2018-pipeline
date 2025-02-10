@@ -9,6 +9,8 @@ params.ants11_cfg = "$params.cfgdir/$params.case/ants11.yaml"
 params.dayavg_cfg = "$params.cfgdir/$params.case/dayavg.yaml"
 params.lstavg_cfg = "$params.cfgdir/$params.case/lstavg.yaml"
 params.interp_cfg = "$params.cfgdir/$params.case/interp.yaml"
+params.beamfac_cfg = "$params.cfgdir/$params.case/beamfac.yaml"
+params.daycal_cfg = "$params.cfgdir/$params.case/daycal.yaml"
 
 params.min_year = 2016
 params.min_day = 250
@@ -70,6 +72,29 @@ process get_ants11 {
     script: "epipe run ants11 $params.kernel --nbout $params.nbdir --cfgfile $params.ants11_cfg"
 }
 
+process get_beamfac {
+    output: 
+    path "beam_factor.hickle", emit: data
+    path "high-res-beamfactor.html", emit: html
+    path "high-res-beamfactor.ipynb", emit: ipynb
+
+    publishDir (
+        path: "results/$params.case/",
+        pattern: "*.hickle"    
+    )
+
+    publishDir(
+        path: "results/$params.case/notebook-html/",
+        pattern: "*.html"
+    )
+    publishDir(
+        path: "results/$params.case/notebook-ipynb/",
+        pattern: "*.ipynb"
+    )
+
+    script: "epipe run high-res-beamfactor $params.kernel --nbout $params.nbdir --cfgfile $params.beamfac_cfg"
+}
+
 process daily_average {
     // There is an issue when trying to launch many jupyter kernels at the same time
     // that they have a race condition and die. This retry should alleviate this,
@@ -121,9 +146,12 @@ process daily_calibration {
     // though it will also mean extra time when the error is something else...
     errorStrategy 'retry'
 
+    maxForks 30
+
     input:
     path single_day_avg
     path calfile
+    path beamfacfile
     path ants11file
 
     output:
@@ -146,10 +174,14 @@ process daily_calibration {
 
     script:
     obsname = single_day_avg.getSimpleName()
+    tmp = 3
     """
     epipe run single-day-calibration $params.kernel --nbout $params.nbdir \
-      --cfgfile $params.dayavg_cfg \
+      --cfgfile $params.daycal_cfg \
       --dayavgfile $single_day_avg \
+      --ants11file $ants11file \
+      --calfile $calfile \
+      --beamfactorfile $beamfacfile \
       --basename single-day-cal-$obsname \
     """
 }
@@ -221,10 +253,11 @@ process interpret {
 workflow {
     get_calibration()
     get_ants11()
+    get_beamfac()
     ydays = get_ydays().splitText().map(v -> v.trim())
     
     daily_average(ydays)
-    daily_calibration(daily_average.out.data, get_calibration.out.data, get_ants11.out.data )
+    daily_calibration(daily_average.out.data, get_calibration.out.data, get_beamfac.out.data, get_ants11.out.data )
     daily_calibration.out.data.collect(sort: true) | gather | average_over_days
     
     interpret(average_over_days.out.data)
