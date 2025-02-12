@@ -23,7 +23,7 @@ def run(
     kernel: str,
     formats: list[str] = ("html",),
     ipynb: bool = True,
-    nbout: Path = Path(),
+    nbout: Path = Path('.'),
     convert_args: str = "",
     cfgfile: Optional[Path] = None,
     basename: Optional[str] = None,

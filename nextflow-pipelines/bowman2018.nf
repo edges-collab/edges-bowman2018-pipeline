@@ -1,5 +1,4 @@
 params.kernel = "prefect-pipeline"
-params.nbdir = "."
 
 params.cfgdir = "/data7/smurray/edges/projects_with_nive/edges-bowman2018-pipeline/configs"
 params.case = "bowman2018repro-injectbeam-doxrfi"
@@ -46,7 +45,7 @@ process get_calibration {
         pattern: "*.ipynb"
     )
 
-    script: "epipe run receiver-calibration $params.kernel --nbout $params.nbdir --cfgfile $params.rcvcal_cfg"
+    script: "epipe run receiver-calibration $params.kernel --cfgfile $params.rcvcal_cfg"
 }
 
 process get_ants11 {
@@ -69,7 +68,7 @@ process get_ants11 {
         pattern: "*.ipynb"
     )
 
-    script: "epipe run ants11 $params.kernel --nbout $params.nbdir --cfgfile $params.ants11_cfg"
+    script: "epipe run ants11 $params.kernel --cfgfile $params.ants11_cfg"
 }
 
 process get_beamfac {
@@ -92,7 +91,7 @@ process get_beamfac {
         pattern: "*.ipynb"
     )
 
-    script: "epipe run high-res-beamfactor $params.kernel --nbout $params.nbdir --cfgfile $params.beamfac_cfg"
+    script: "epipe run high-res-beamfactor $params.kernel --cfgfile $params.beamfac_cfg"
 }
 
 process daily_average {
@@ -134,7 +133,7 @@ process daily_average {
     year = yday.split("-")[0]
     day = yday.split("-")[1]
     """
-    epipe run single-day $params.kernel --nbout $params.nbdir \
+    epipe run single-day $params.kernel  \
       --cfgfile $params.dayavg_cfg --year $year --day $day \
       --basename single-day-avg-$yday \
       --outdir .
@@ -178,7 +177,7 @@ process daily_calibration {
     obsname = single_day_avg.getSimpleName()
     tmp = 3
     """
-    epipe run single-day-calibration $params.kernel --nbout $params.nbdir \
+    epipe run single-day-calibration $params.kernel \
       --cfgfile $params.daycal_cfg \
       --dayavgfile $single_day_avg \
       --ants11file $ants11file \
@@ -222,7 +221,7 @@ process average_over_days {
     )
     script:
     """
-    epipe run average-over-days $params.kernel --nbout $params.nbdir \
+    epipe run average-over-days $params.kernel \
       --cfgfile $params.lstavg_cfg \
       --gathered_days_file $gatherfile \
     """
@@ -247,7 +246,7 @@ process interpret {
 
     script:
     """
-    epipe run interpret $params.kernel --nbout $params.nbdir \
+    epipe run interpret $params.kernel \
       --cfgfile $params.interp_cfg \
       --avgspec_file $avgfile \
     """
