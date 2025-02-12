@@ -113,6 +113,7 @@ process daily_average {
     // will effectively be ignored for the rest of the pipeline.
     output:
     path "${yday}.averaged.gsh5", optional: true, emit: data
+    path "${yday}.lsts.txt", optional: true, emit: lsts
     path "single-day-avg-${yday}.html", emit: html
     path "single-day-avg-${yday}.ipynb", emit: ipynb
 
@@ -150,6 +151,7 @@ process daily_calibration {
 
     input:
     path single_day_avg
+    path lstfile
     path calfile
     path beamfacfile
     path ants11file
@@ -257,7 +259,13 @@ workflow {
     ydays = get_ydays().splitText().map(v -> v.trim())
     
     daily_average(ydays)
-    daily_calibration(daily_average.out.data, get_calibration.out.data, get_beamfac.out.data, get_ants11.out.data )
+    daily_calibration(
+        daily_average.out.data, 
+        daily_average.out.lsts, 
+        get_calibration.out.data, 
+        get_beamfac.out.data, 
+        get_ants11.out.data
+    )
     daily_calibration.out.data.collect(sort: true) | gather | average_over_days
     
     interpret(average_over_days.out.data)
