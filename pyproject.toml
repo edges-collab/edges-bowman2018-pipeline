@@ -21,7 +21,6 @@ dependencies = [
     "jupyter>=1.1.1",
     "nbconvert>=7.16.4",
     "papermill>=2.6.0",
-    "prefect[dask]>=3.0.3",
     "pygsdata>=0.2.0",
     "read-acq>=1.1.0",
 ]
