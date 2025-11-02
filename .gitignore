@@ -145,8 +145,7 @@ cache/
 output-notebooks/
 prefect-cache/
 work/
-results/*/notebook-html/
-results/*/notebook-ipynb/single-day*
+results/*/notebooks/single-day*
 *.gsh5
 .nextflow.log*
 report-*.html
@@ -155,3 +154,6 @@ report-*.html
 prefect-pipeline/
 sp*.txt
 s11*.csv
+results/*/day-averaged-data/
+.lineage/
+

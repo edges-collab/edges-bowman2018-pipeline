@@ -1,0 +1,2 @@
+do_beam_correction: true
+beam_mode: 'all-unflagged-lsts'

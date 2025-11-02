@@ -37,7 +37,7 @@ The above assumes that `~/.local/bin`  is on your `$PATH`. If it's not, add it.
 The pipeline is run using `nextflow`. Once you are setup, running is very simple:
 
 ```bash
-nextflow run nextflow-pipelines/bowman2018.nf --case bowman2018repro-injectbeam-injectrfi
+nextflow run bowman2018.nf -profile injectbeam-injectrfi
 ```
 
 See the [NextFlow Docs](https://nextflow.io/docs/latest/cli.html) for more information about the arguments you can pass
@@ -119,3 +119,15 @@ Note that pretty much all of our `process` scripts are simply calls to our
 notebook. Any actual analysis logic you want to implement should be done in one of these
 notebooks.
 
+
+## Notes
+
+* We switched from having a `configs/` directory with a separate folder for each "case" to having loose YAML files in the `configs/` directory, because `nextflow` caches on the inputs to a process, which would change ALL processes for every case.
+This meant that if you updated something that only affected e.g. the final averaging 
+over nights, it would still re-run all the xRFI etc. We maintain the ability to 
+easily switch between parameter-sets by using the `-profile` argument to `nextflow run`.
+* We also pulled out the `edges-pipelines` package to a separate repo, because it can
+easily be re-used in other pipelines. 
+* Notebooks for this pipeline are kept in this repo, because they are quite specific.
+Furthermore, it's better to pass the notebook explicitly by path, so that if it is 
+updated, it will invalidate the cache.

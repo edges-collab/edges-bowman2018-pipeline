@@ -1,0 +1,2 @@
+do_beam_correction: true
+beam_mode: 'legacy-lst-grid'
