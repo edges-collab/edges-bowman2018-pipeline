@@ -1,59 +1,61 @@
 # edges-bowman2018-pipeline
 
-Repo for formally reproducing the Bowman et al. 2018 Nature paper results.
+A pipeline for formally reproducing the Bowman et al. 2018 Nature paper results using 
+`nextflow`.
 
-## Installation
+## Setting Up
 
-There are a couple of steps for setting up the pipeline:
+To set up the environment to run this pipeline, follow these steps:
 
-1. Installing the python environment
-2. Installing `nextflow`
+1. Install the python environment.
+   1. First installl `uv` if you haven't already: 
 
-### Installing the Python Environment
+      ```bash
+      curl -LsSf https://astral.sh/uv/install.sh | sh
+      ```
+   2. Then at the top-level of this project, do `uv sync`.
 
-The preferred method of constructing the environment for this repo is to use `uv`. Install uv with this command:
+2. Install the jupyter kernel: 
+   
+   ```bash
+   uv run python -m ipykernel install --user  --name bowman2018-pipeline
+   ```
 
-```
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+   Note that if you choose a different kernel name, then you will need to update the
+   `nextflow.config` file to reflect this (look for the line that says `kernel = ...`).
 
-Then, at the top-level of this project, do `uv sync`.
+3. Installing `nextflow`:
+   Follow the instructions [here](https://nextflow.io/docs/latest/install.html):
 
-### Installing `nextflow`
+   ```bash
+   curl -s https://get.nextflow.io | bash
+   chmod +x nextflow
+   mkdir -p $HOME/.local/bin/
+   mv nextflow $HOME/.local/bin/
+   ```
 
-Follow the instructions [here](https://nextflow.io/docs/latest/install.html):
-
-```bash
-curl -s https://get.nextflow.io | bash
-chmod +x nextflow
-mkdir -p $HOME/.local/bin/
-mv nextflow $HOME/.local/bin/
-```
-
-The above assumes that `~/.local/bin`  is on your `$PATH`. If it's not, add it.
 
 ## Running the pipeline
 
-The pipeline is run using `nextflow`. Once you are setup, running is very simple:
+The pipeline is run using `nextflow`. Once you are setup, running is very simple.
+First ensure your python environment is activated:
 
 ```bash
-nextflow run bowman2018.nf -profile injectbeam-injectrfi
+source .venv/bin/activate
 ```
 
-See the [NextFlow Docs](https://nextflow.io/docs/latest/cli.html) for more information about the arguments you can pass
-to `nextflow`.
+Then run the pipeline with the desired profile. For example, to run the "injectbeam-injectrfi" case, do the following from the project root:
+
+```bash
+nextflow run bowman2018.nf -profile injectbeam_injectrfi -resume
+```
+
+See the [NextFlow Docs](https://nextflow.io/docs/latest/cli.html) for more information 
+about the arguments you can pass to `nextflow`.
 
 Some of the more important aspects are:
 
-* Anything passed to the `nextflow run` command that is prefixed by double-dash
-  (e.g. the `--case` in the above example) specifies a parameter for the workflow. These
-  parameters are defined by whoever wrote the workflow itself, and can be identified
-  as anything set as `params.PARAMNAME` in the `*.nf` workflow file. So, for example,
-  the `nextflow-pipelines/bowman2018.nf` workflow has defined `params.case = ....`
-  somewhere close to the top of the file.
-* If you run the pipeline and it fails at some step, go and fix the error, and then when
-  you re-run, can use the same command, but append `-resume` to the end of it (notice
-  only one dash). This will resume the calculation using cached files.
+* Always use `-resume` to avoid re-computing things you've already done.
 * You can use `nextflow log` to inspect past runs and their status. I especially like to
   use `nextflow log <RUNNAME> -f workdir,process,script` to see where a particular 
   notebook ran (each process runs in its own keyed directory to isolate it, which is 
@@ -64,34 +66,37 @@ Some of the more important aspects are:
 
 The pipeline consists of a few components:
 
-1. A top-level `nextflow` workflow file (ending in `.nf`). This defines the overall
-   run logic of the pipeline. We keep all of our pipelines in `nextflow-pipelines/`
-   to keep things organized (for example, `nextflow-pipelines/bowman2018.nf` has the 
-   pipeline to reproduce the B18 results). See below for more information about this
-   file.
-2. A set of config files, in `config/`. In this directory are a bunch of directories.
-   Each of these subdirectories defines a "case", which is what the `--case` argument
-   above referred to. Basically these are just different parameter sets for choices
-   in running the pipeline. The case that most accurately reproduces B18 is 
-   `bowman2018repro-injectbeam-injectrfi`. In each directory are a set of YAML files.
-   Each file houses parameters that will be imputed to the *Jupyter Notebooks* that run
-   the analysis (see below). Any parameter defined in the top "Parameter" cell of a 
-   notebook can be included in these YAML files.
-3. A `src/` folder in which resides a normal Python package, called `edges-pipelines`. 
-   This is what will be installed when you do `uv pip install -e .` (or `uv sync`).
-   This package houses some utility functions that are used in the analysis notebooks,
-   that don't really fit in any other EDGES repo.
-4. Once you install `edges-pipelines` you will also have access to the `epipe` program.
+1. A top-level `bowman2018.nf` workflow file. This defines the overall
+   run logic of the pipeline. 
+2. A set of config files, in `configs/`. These are just different parameter sets for choices
+   in running the pipeline. Each file controls the parameters for one notebook in 
+   the pipeline (the notebook it controls is the prefix of the filename, so e.g. 
+   the config controlling the beam factor computation is `beamfac.yaml`). If the YAML
+   file has anything else in the title, it indicates a specific case, e.g. 
+   `dayavg-injectflags.yaml` is the config for the day-averaging notebook for the
+   case where we inject RFI flags from the legacy pipeline.
+4. This pipeline depends on the `edges-pipeline-utils` package (which is installed
+   when you run `uv sync` above). This gives access to the `epipe` program.
    This program has a few commands, for example: `get-ydays`, `gather` and `run`. 
    These commands are used within the `nextflow` workflow file, but you can also just
    use them from the CLI to test things out.
 5. There is a `results/` folder, which is where the results of the pipeline will be 
    stored. Each `case` will be saved to a different subfolder. If you change the 
    parameters *within* a case, the results will be over-written. Importantly, within
-   this folder there are `notebook-html/` and `notebook-ipynb/` folders housing all the
+   this folder there is a  `notebooks/` folder housing all the
    evaluated analysis notebooks (with plots included) from the runs. 
 6. Once you do a run, there will also be a `work/` folder, which houses the intermediate
    cache products of the run. You'll only interact with this folder if you're debugging.
+7. The `nextflow.config` file houses configuration options for `nextflow` itself, as well
+   as some parameters for the pipeline (e.g. where the raw data is stored, what kernel
+   to use for running the notebooks, etc).
+8. Importantly, the `nextflow.config` also defines a list of "profiles", each of which
+   corresponds to a different "case" for the pipeline. Each profile specifies the set
+   of YAML config files that will be used. Thus, changing which entire case to run can
+   be accomplished by changing the `-profile` on the CLI when running `nextflow`.
+9. Even when running different `profiles`, still use `-resume` every time -- this way
+   when you are only changing parameters affecting the end of the processing, you will
+   avoid a lot of unnecessary recomputation.
 
 ### The `nextflow` workflow file
 
@@ -99,20 +104,18 @@ The `nextflow` workflow (a `.nf` file) drives the whole pipeline. You can read a
 how to write workflows at the `nextflow` documentation. Here I'll just give the barebones
 so you can kinda grok how our pipeline works. The file consists of the following:
 
-1. A set of parameter definitions, in the form `params.PARAMNAME = value`, for example
-   `params.case = "bowman2018repro-injectbeam-injectrfi"`. As mentioned above, the 
-   `PARAMNAME` can be specified on the CLI when running the workflow to override the
-   default (the default is the thing set in the workflow file itself).
-2. A set of `process` definitions, of the form `process NAME {... code ...}`. These
+1. A set of `process` definitions, of the form `process NAME {... code ...}`. These
    are the backbone of the workflow. They take some `inputs:`, define some `outputs:`
    and run a `script:` to get between the inputs and outputs. The `script:` itself is
    generally written in `bash`, and we try to make it as short as possible (generally
    it just calls some other script written in a nicer language like Python to do the
    actual work). Within any `process`, the parameters we mentioned above can be 
    accessed via `${params.PARAMNAME}`. 
-3. Finally, a single `workflow` definition, of the form `workflow {... code ...}`. This
+2. Finally, a single `workflow` definition, of the form `workflow {... code ...}`. This
    workflow is the top-level glue that puts all the processes together, sending the 
    data through the pipeline. 
+3. An `output` clause that tells the pipeline where to put all the "published" files
+   at the end.
 
 Note that pretty much all of our `process` scripts are simply calls to our 
 `epipe` CLI tool. Most of them use `epipe run`, which goes and runs a particular Jupyter
@@ -122,8 +125,10 @@ notebooks.
 
 ## Notes
 
-* We switched from having a `configs/` directory with a separate folder for each "case" to having loose YAML files in the `configs/` directory, because `nextflow` caches on the inputs to a process, which would change ALL processes for every case.
-This meant that if you updated something that only affected e.g. the final averaging 
+* We switched from having a `configs/` directory with a separate folder for each "case" 
+to having loose YAML files in the `configs/` directory, because `nextflow` caches on the
+inputs to a process, which would change ALL processes for every case. This meant that if 
+you updated something that only affected e.g. the final averaging 
 over nights, it would still re-run all the xRFI etc. We maintain the ability to 
 easily switch between parameter-sets by using the `-profile` argument to `nextflow run`.
 * We also pulled out the `edges-pipelines` package to a separate repo, because it can

@@ -176,6 +176,7 @@ process average_over_days {
     output:
     path "averaged_spectrum.gsh5", emit: data
     path "averaged_spectrum_legacy_days.gsh5", emit: alandata
+    path "filtered-gathered-data.gsh5", emit: filtereddata
     path "${basename}.ipynb", emit: report
 
     script:
@@ -242,6 +243,7 @@ workflow {
     gathered_days_data = gather.out
     avg_over_days_data = average_over_days.out.data
     avg_over_days_legacy_data = average_over_days.out.alandata
+    filtered_data = average_over_days.out.filtereddata
 
     cal_report = get_calibration.out.report
     ants11_report = get_ants11.out.report
@@ -291,6 +293,9 @@ output {
         path "${params.label}/notebooks/single-day-cal/"
     }
     gathered_days_data {
+        path "${params.label}/"
+    }
+    filtered_data {
         path "${params.label}/"
     }
     avg_over_days_data {
