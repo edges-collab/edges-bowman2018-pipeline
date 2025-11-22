@@ -215,7 +215,7 @@ workflow {
     ).splitText().map(v -> v.trim())
     convert_acq(ydays)
 
-    get_calibration(file(params.rcvcal_config), file("notebooks/receiver-calibration.ipynb"))
+    get_calibration(file(params.rcvcal_config), file("notebooks/receiver-calibration-full.ipynb"))
     get_ants11(file(params.ants11_config), file("notebooks/ants11.ipynb"))
     get_beamfac(file(params.beamfac_config), file("notebooks/high-res-beamfactor.ipynb"))
 

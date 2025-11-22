@@ -9,3 +9,4 @@ dependencies = [
 
 [tool.uv.sources]
 edges-pipeline-utils = { git = "https://github.com/edges-collab/edges-pipeline-utils" }
+edges-analysis = { git = "https://github.com/edges-collab/edges-analysis" }
