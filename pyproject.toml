@@ -5,6 +5,7 @@ requires-python = ">=3.11"
 dependencies = [
     "edges-analysis==8.0.0",
     "edges-pipeline-utils",
+    "toml>=0.10.2",
 ]
 
 [tool.uv.sources]
