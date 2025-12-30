@@ -818,8 +818,8 @@ wheels = [
 
 [[package]]
 name = "edges-analysis"
-version = "8.0.1.dev11+gac0c145ad"
-source = { git = "https://github.com/edges-collab/edges-analysis#ac0c145ade4125f915cfef9d68f8d94ce3b456fc" }
+version = "8.1.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "astropy" },
     { name = "astropy-healpix" },
@@ -852,6 +852,7 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "yabf" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/29/8a/4315ebeb95216c1bb8f5679edbc4c6d529e45f4868f185cdbf112f91fca5/edges_analysis-8.1.0.tar.gz", hash = "sha256:8dc30af3c8869d21d0204ee21cf95e59e35c6cf0450f8aa5eb34c0a44f0b744a", size = 91219632, upload-time = "2025-12-11T01:44:26.767Z" }
 
 [[package]]
 name = "edges-bowman2018-pipeline"
@@ -865,7 +866,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "edges-analysis", git = "https://github.com/edges-collab/edges-analysis" },
+    { name = "edges-analysis", specifier = "==8.1.0" },
     { name = "edges-pipeline-utils", git = "https://github.com/edges-collab/edges-pipeline-utils" },
     { name = "toml", specifier = ">=0.10.2" },
 ]
