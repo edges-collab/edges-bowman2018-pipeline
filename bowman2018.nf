@@ -40,7 +40,8 @@ process get_ants11 {
     path notebook
 
     output: 
-    path "2015_ants11_modelled.h5", emit: data
+    path "ants11.h5", emit: data
+    path "ants11_calibrated_time_dependent.npy", emit: unavg_data
     path "${basename}.ipynb", emit: report
 
     script: 
@@ -235,6 +236,7 @@ workflow {
     publish:
     cal_data = get_calibration.out.data
     ants11_data = get_ants11.out.data
+    ants11_unavg_data = get_ants11.out.unavg_data
     beamfac_data = get_beamfac.out.data
     singleavg_data = daily_average.out.data
     singleavg_flginfo = daily_average.out.flaginfo
@@ -263,6 +265,9 @@ output {
         path "${params.label}/notebooks/"
     }
     ants11_data {
+        path "${params.label}/"
+    }
+    ants11_unavg_data {
         path "${params.label}/"
     }
     ants11_report {

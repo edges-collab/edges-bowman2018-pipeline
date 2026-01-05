@@ -3,7 +3,7 @@ name = "edges-bowman2018-pipeline"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "edges-analysis==8.1.0",
+    "edges-analysis==8.2.0",
     "edges-pipeline-utils",
     "toml>=0.10.2",
 ]

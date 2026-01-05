@@ -790,6 +790,18 @@ wheels = [
 ]
 
 [[package]]
+name = "deprecation"
+version = "2.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5a/d3/8ae2869247df154b64c1884d7346d412fed0c49df84db635aab2d1c40e62/deprecation-2.1.0.tar.gz", hash = "sha256:72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff", size = 173788, upload-time = "2020-04-20T14:23:38.738Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/02/c3/253a89ee03fc9b9682f1541728eb66db7db22148cd94f89ab22528cd1e1b/deprecation-2.1.0-py2.py3-none-any.whl", hash = "sha256:a10811591210e1fb0e768a8c25517cabeabcba6f0bf96564f8ff45189f90b14a", size = 11178, upload-time = "2020-04-20T14:23:36.581Z" },
+]
+
+[[package]]
 name = "dill"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -818,7 +830,7 @@ wheels = [
 
 [[package]]
 name = "edges-analysis"
-version = "8.1.0"
+version = "8.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "astropy" },
@@ -827,6 +839,7 @@ dependencies = [
     { name = "bidict" },
     { name = "cattrs" },
     { name = "cyclopts" },
+    { name = "deprecation" },
     { name = "dill" },
     { name = "frozendict" },
     { name = "h5py" },
@@ -852,7 +865,7 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "yabf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/29/8a/4315ebeb95216c1bb8f5679edbc4c6d529e45f4868f185cdbf112f91fca5/edges_analysis-8.1.0.tar.gz", hash = "sha256:8dc30af3c8869d21d0204ee21cf95e59e35c6cf0450f8aa5eb34c0a44f0b744a", size = 91219632, upload-time = "2025-12-11T01:44:26.767Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/77/31/c5aeaf843ef67669363c54116780f5472abf3249af202310b68877674f24/edges_analysis-8.2.0.tar.gz", hash = "sha256:57576ffaf29f9c5cc93db5e9b2e786d22dd2357469ca4aa527221101f3a01cdb", size = 91220909, upload-time = "2026-01-05T22:46:18.707Z" }
 
 [[package]]
 name = "edges-bowman2018-pipeline"
@@ -866,7 +879,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "edges-analysis", specifier = "==8.1.0" },
+    { name = "edges-analysis", specifier = "==8.2.0" },
     { name = "edges-pipeline-utils", git = "https://github.com/edges-collab/edges-pipeline-utils" },
     { name = "toml", specifier = ">=0.10.2" },
 ]

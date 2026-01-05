@@ -1,1 +1,5 @@
 outdir: "."
+
+# The following is used to compare results to the legacy pipeline for debugging.
+# Simply comment the line if you do not have access to this file (the file itself is in this repo)
+legacy_ants11_file: "/data5/edges/data/S11_antenna/low_band/S11_blade_low_band_2015_342_03_14.txt"
