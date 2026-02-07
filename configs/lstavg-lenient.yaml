@@ -1,2 +1,6 @@
+# Note: RFI round 3 wasn't actually run for the H2 Case
+# in B18, even though the code that Alan sent has it
+# turned on. It only flags a single channel. 
+do_rfi_round_3: false
 raise_unmatching: false
 compare_alan: false
