@@ -830,7 +830,7 @@ wheels = [
 
 [[package]]
 name = "edges-analysis"
-version = "8.2.0"
+version = "8.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "astropy" },
@@ -865,7 +865,7 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "yabf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/77/31/c5aeaf843ef67669363c54116780f5472abf3249af202310b68877674f24/edges_analysis-8.2.0.tar.gz", hash = "sha256:57576ffaf29f9c5cc93db5e9b2e786d22dd2357469ca4aa527221101f3a01cdb", size = 91220909, upload-time = "2026-01-05T22:46:18.707Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4d/dd/457a788898f98c5ffc82a788b5956ba35076f4d08381d80ed53abdab7e1c/edges_analysis-8.3.0.tar.gz", hash = "sha256:843875ce4e5fdc7b27ba0f01016c83089d41fa7c94487668658bb68ea9515dc1", size = 91465201, upload-time = "2026-03-05T12:56:33.293Z" }
 
 [[package]]
 name = "edges-bowman2018-pipeline"
@@ -874,13 +874,15 @@ source = { virtual = "." }
 dependencies = [
     { name = "edges-analysis" },
     { name = "edges-pipeline-utils" },
+    { name = "pygsdata" },
     { name = "toml" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "edges-analysis", specifier = "==8.2.0" },
+    { name = "edges-analysis", specifier = "==8.3.0" },
     { name = "edges-pipeline-utils", git = "https://github.com/edges-collab/edges-pipeline-utils" },
+    { name = "pygsdata", specifier = "==0.3.1" },
     { name = "toml", specifier = ">=0.10.2" },
 ]
 
@@ -2812,7 +2814,7 @@ wheels = [
 
 [[package]]
 name = "pygsdata"
-version = "0.2.3"
+version = "0.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "astropy" },
@@ -2825,7 +2827,7 @@ dependencies = [
     { name = "scipy" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d7/89/76e794e28575fe4f6700bd2b0e438acd99299cafc87503e71e4f499f8ee8/pygsdata-0.2.3.tar.gz", hash = "sha256:87cc9b0a5a73abfae0235885a0b02475f25b7a68c4678e856d77e4306329d469", size = 57492, upload-time = "2025-08-15T02:36:10.227Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/88/25/258002d0dade3b5d1d03f5549d273686028f02350683b8fbbae8e3c356e7/pygsdata-0.3.1.tar.gz", hash = "sha256:8e68566f25c649ae762823b1a0008c474d0e8590fd8936712ecf6131546ab5e3", size = 188822, upload-time = "2026-03-04T19:48:55.375Z" }
 
 [[package]]
 name = "pyparsing"

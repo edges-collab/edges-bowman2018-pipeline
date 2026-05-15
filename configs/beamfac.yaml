@@ -1,2 +1,3 @@
+beamfile: "/data7/smurray/edges/projects_with_nive/edges-bowman3018-pipeline/input-data/newniv.txt"
 outdir: "."
 dlst: 0.1
